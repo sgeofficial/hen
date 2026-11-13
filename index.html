@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="id" manifest="navigation.manifest">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+  <title>SUPER GAMES ELEKTRONIK | PS4 5.05 / 6.72 / 7.00–13.52 + 14.00 FW Host</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      width: 100%; height: 100%; overflow: hidden;
+      background: #020612 url('bg-loading.png') center center / 100% 100% no-repeat fixed;
+      color: #eef5ff; font-family: Arial, Helvetica, sans-serif;
+    }
+
+    /* Pengunci Akses PC / HP */
+    #pc-block {
+      display: none; position: fixed; inset: 0; z-index: 999999;
+      background: #0b0e14; align-items: center; justify-content: center;
+    }
+    #pc-block .box {
+      background: #141821; border: 1px solid #2b3240; border-radius: 16px;
+      padding: 36px 44px; max-width: 580px; width: 90%; text-align: center;
+    }
+    #pc-block h2 { color: #ff4d4d; font-size: 22px; margin-bottom: 18px; }
+    #pc-block pre {
+      background: #0d1017; border: 1px solid #252b38; border-radius: 10px;
+      padding: 14px; text-align: left; font-size: 13px; color: #94a3b8;
+      white-space: pre-wrap; word-break: break-all;
+    }
+
+    /* Kotak Status Tengah Persis Gaya Play's Game */
+    .shell {
+      position: fixed; top: 47%; left: 50%; transform: translate(-50%, -50%);
+      width: 72%; max-width: 820px; z-index: 10;
+    }
+    .status-card {
+      border: 1px solid rgba(75, 149, 255, 0.85);
+      border-right-color: rgba(244, 62, 225, 0.85);
+      border-radius: 15px;
+      background: rgba(4, 15, 39, 0.90);
+      box-shadow: 0 0 30px rgba(0, 100, 255, 0.25);
+      padding: 6px 24px 12px;
+      text-align: center;
+    }
+    .status-row {
+      display: flex; align-items: center; gap: 16px; text-align: left;
+      padding: 10px 0; border-bottom: 1px solid rgba(168, 190, 225, 0.17);
+      opacity: 0.45;
+    }
+    .status-row.active { opacity: 1; }
+    .status-row.done { opacity: 0.88; }
+    .icon {
+      width: 52px; height: 52px; min-width: 52px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      border: 2px solid #28c9ff; color: #62d9ff; font-size: 17px; font-weight: 800;
+    }
+    .status-row.done .icon { border-color: #34e69a; color: #34e69a; }
+    .status-row:nth-child(2) .icon { border-color: #ab58ff; color: #b76cff; }
+    .status-row:nth-child(3) .icon { border-color: #ffba34; color: #ffc24b; }
+    .copy { display: flex; flex-direction: column; flex: 1; }
+    .copy strong { font-size: 20px; color: #ffffff; }
+    .copy span { font-size: 14px; color: #b7c2d7; margin-top: 2px; }
+    .badge-ok { color: #34e69a; font-weight: 800; font-size: 20px; display: none; }
+    .status-row.done .badge-ok { display: block; }
+
+    /* Progress Bar Offline Cache di Bawah Kotak Status (Seperti Play's Game) */
+    .cache-progress {
+      height: 10px; margin: 10px 4px 6px;
+      border: 1px solid rgba(80, 170, 255, 0.45);
+      border-radius: 999px; overflow: hidden;
+      background: rgba(0, 0, 0, 0.4);
+    }
+    .cache-progress-bar {
+      height: 100%; width: 10%; border-radius: 999px;
+      background: linear-gradient(90deg, #00d9ff, #4776ff, #d94bff);
+      transition: width 0.3s ease;
+    }
+    .route-note { font-size: 14px; color: #c9d6e9; padding-top: 4px; }
+
+    /* Layar 2: Background Sukses Penuh */
+    #doneOverlay {
+      display: none; position: fixed; inset: 0; z-index: 99999;
+      background: #000 url('bg-success.png') center center / 100% 100% no-repeat fixed;
+    }
+    #doneOverlay.show { display: block; }
+  </style>
+</head>
+<body>
+
+  <div id="pc-block">
+    <div class="box">
+      <h2>&#10060; Perangkat ini bukan PlayStation 4.</h2>
+      <pre id="ua-display"></pre>
+    </div>
+  </div>
+
+  <main class="shell" id="mainShell">
+    <section class="status-card">
+      <div class="status-row active" id="rowDetect">
+        <div class="icon">FW</div>
+        <div class="copy">
+          <strong id="detectTitle">Detecting Firmware...</strong>
+          <span id="detectSub">Checking your PS4 system information</span>
+        </div>
+        <div class="badge-ok">&#10004;</div>
+      </div>
+
+      <div class="status-row" id="rowCache">
+        <div class="icon">SYS</div>
+        <div class="copy">
+          <strong id="cacheTitle">Preparing Host...</strong>
+          <span id="cacheSub">Selecting the correct exploit route</span>
+        </div>
+        <div class="badge-ok">&#10004;</div>
+      </div>
+
+      <div class="status-row" id="rowHen">
+        <div class="icon">HEN</div>
+        <div class="copy">
+          <strong id="henTitle">Loading GoldHEN...</strong>
+          <span id="henSub">Waiting for cache status</span>
+        </div>
+        <div class="badge-ok">&#10004;</div>
+      </div>
+
+      <div class="cache-progress"><div class="cache-progress-bar" id="cacheBar"></div></div>
+      <div class="route-note" id="routeNote">Starting firmware detector...</div>
+    </section>
+  </main>
+
+  <!-- Iframe Tersembunyi Menjalankan Mesin Asli Tanpa Muncul Layar Abu-Abu -->
+  <iframe id="runtimeFrame" style="position:fixed;width:2px;height:2px;opacity:0;pointer-events:none;border:0;"></iframe>
+
+  <!-- Layar Sukses Kedua -->
+  <div id="doneOverlay" aria-hidden="true"></div>
+
+  <script>
+    (function() {
+      var ua = navigator.userAgent;
+      if (!/PlayStation 4/i.test(ua)) {
+        document.getElementById('pc-block').style.display = 'flex';
+        document.getElementById('ua-display').textContent = "User-Agent Terdeteksi:\n" + ua;
+        return;
+      }
+
+      var match = ua.match(/PlayStation 4\/([0-9]+\.[0-9]+)/i);
+      var fw = match ? parseFloat(match[1]) : 9.00;
+      var fwText = match ? match[1] : "9.00";
+
+      var targetUrl = "900/index5.html";
+      if (fw === 5.05) targetUrl = "505/index.html";
+      else if (fw === 6.72) targetUrl = "672/index.html";
+      else if (fw >= 7.00 && fw <= 8.52) targetUrl = "700/index.html";
+      else if (fw >= 9.00 && fw <= 9.60) targetUrl = "900/index5.html";
+      else if (fw >= 11.00 && fw <= 13.00) targetUrl = "1300/index.html";
+      else if (fw >= 13.02) targetUrl = "1352/index.html";
+
+      // Langkah 1: Deteksi FW
+      document.getElementById('detectTitle').textContent = "Firmware " + fwText + " Detected";
+      document.getElementById('detectSub').textContent = "PS4 System Ready (" + targetUrl + ")";
+      document.getElementById('rowDetect').className = "status-row done";
+      document.getElementById('rowCache').className = "status-row active";
+      document.getElementById('cacheBar').style.width = "35%";
+      document.getElementById('routeNote').textContent = "Caching host files for offline use...";
+
+      function jalankanExploit() {
+        document.getElementById('cacheBar').style.width = "100%";
+        document.getElementById('cacheTitle').textContent = "Host Ready (Offline Cached)";
+        document.getElementById('cacheSub').textContent = "Route selected: " + targetUrl;
+        document.getElementById('rowCache').className = "status-row done";
+        document.getElementById('rowHen').className = "status-row active";
+        document.getElementById('henSub').textContent = "Injecting GoldHEN payload automatically...";
+        document.getElementById('routeNote').textContent = "Activating GoldHEN on PS4 " + fwText + "...";
+
+        var frame = document.getElementById('runtimeFrame');
+        frame.src = targetUrl;
+
+        var startTime = Date.now();
+        var checkDone = setInterval(function() {
+          try {
+            var doc = frame.contentDocument || frame.contentWindow.document;
+            var txt = doc.body ? (doc.body.innerText || "") : "";
+            var elapsed = Date.now() - startTime;
+
+            // Jika terdeteksi teks sukses atau sudah berjalan > 7 detik setelah payload dimuat
+            if (txt.indexOf("Exploited") !== -1 || txt.indexOf("GoldHEN") !== -1 || txt.indexOf("staged") !== -1 || elapsed > 8500) {
+              clearInterval(checkDone);
+              document.getElementById('henTitle').textContent = "GoldHEN Activated!";
+              document.getElementById('henSub').textContent = "Jailbreak successful";
+              document.getElementById('rowHen').className = "status-row done";
+              document.getElementById('routeNote').textContent = "Done! Switching to completion screen...";
+              setTimeout(function() {
+                document.getElementById('doneOverlay').className = "show";
+              }, 1200);
+            }
+          } catch (e) {}
+        }, 600);
+      }
+
+      // Pantau Offline Cache Browser PS4 langsung di kotak tengah
+      var appCache = window.applicationCache;
+      var sudahJalan = false;
+      function mulaiSekali() {
+        if (sudahJalan) return;
+        sudahJalan = true;
+        jalankanExploit();
+      }
+
+      if (appCache) {
+        appCache.addEventListener('progress', function(e) {
+          if (e.lengthComputable) {
+            var pct = Math.round((e.loaded / e.total) * 100);
+            document.getElementById('cacheBar').style.width = pct + "%";
+            document.getElementById('routeNote').textContent = "Installing offline cache: " + pct + "%";
+          }
+        }, false);
+        appCache.addEventListener('cached', mulaiSekali, false);
+        appCache.addEventListener('updateready', mulaiSekali, false);
+        appCache.addEventListener('noupdate', mulaiSekali, false);
+        appCache.addEventListener('error', mulaiSekali, false);
+        setTimeout(mulaiSekali, 4000);
+      } else {
+        setTimeout(mulaiSekali, 1200);
+      }
+    })();
+  </script>
+</body>
+</html>
