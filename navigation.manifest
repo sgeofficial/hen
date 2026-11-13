@@ -1,0 +1,18 @@
+CACHE MANIFEST
+# v2.0 - SUPER GAMES ELEKTRONIK OFFLINE
+
+CACHE:
+index.html
+bg-loading.png
+bg-success.png
+900/index5.html
+900/alert5.js
+900/exploit.js
+900/goldhen.bin
+900/int64.js
+900/kexploit.js
+900/rop.js
+900/webkit.js
+
+NETWORK:
+*
